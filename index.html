@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samadhan - Civic Issue Resolution Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100">
+
+    <div id="app" class="max-w-7xl mx-auto bg-white min-h-screen shadow-lg">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-50 border-b">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="#" id="home-link" class="text-2xl font-bold text-blue-700 flex items-center gap-2">
+                    <i data-lucide="shield-check"></i> Samadhan
+                </a>
+                <div id="user-nav" class="flex items-center gap-4">
+                    <!-- Nav items will be dynamically inserted here -->
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8">
+            <!-- =================================================================== -->
+            <!-- CITIZEN PORTAL VIEW -->
+            <!-- =================================================================== -->
+            <div id="citizen-view" class="view active">
+                <div class="text-center bg-blue-50 p-8 rounded-xl border border-blue-100">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Welcome to Samadhan</h1>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">Your direct link to municipal authorities. Report civic issues, track their resolution, and help build a better community.</p>
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <button id="report-issue-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow hover:bg-blue-700 transition w-full sm:w-auto flex items-center justify-center gap-2"><i data-lucide="megaphone"></i>Report an Issue</button>
+                        <button id="view-leaderboard-btn-citizen" class="bg-white text-blue-600 border border-blue-600 font-semibold py-3 px-6 rounded-lg hover:bg-blue-50 transition w-full sm:w-auto flex items-center justify-center gap-2"><i data-lucide="trophy"></i>Community Leaderboard</button>
+                    </div>
+                </div>
+                 <div id="my-reports-container" class="mt-8 hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">My Submitted Reports</h2>
+                    <div id="my-reports-list" class="space-y-4">
+                        <!-- User's reports will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- =================================================================== -->
+            <!-- LOGIN/REGISTER VIEW -->
+            <!-- =================================================================== -->
+            <div id="login-view" class="view">
+                 <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-md border">
+                    <h2 id="login-title" class="text-2xl font-bold text-center text-gray-800 mb-6">Citizen Login</h2>
+                    <form id="auth-form">
+                        <div id="email-field" class="mb-4">
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div id="password-field" class="mb-6">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                         <div id="register-confirm-password-field" class="mb-6 hidden">
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <input type="password" id="confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Login</button>
+                    </form>
+                    <p id="auth-toggle-text" class="text-center text-sm text-gray-600 mt-4">
+                        Don't have an account? <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Register here</a>.
+                        <br>Are you an admin? <a href="#" id="show-admin-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Admin</a>.
+                    </p>
+                 </div>
+            </div>
+
+            <!-- =================================================================== -->
+            <!-- ADMIN DASHBOARD VIEW -->
+            <!-- =================================================================== -->
+            <div id="admin-view" class="view">
+                <h1 class="text-3xl font-bold text-gray-800 mb-1">Admin Dashboard</h1>
+                <p id="admin-department-text" class="text-gray-600 mb-6">Viewing all reported civic issues.</p>
+                <div class="mb-4 flex gap-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="filter-fake" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-gray-700">Show only "Potentially Fake"</span>
+                    </label>
+                </div>
+                <div id="admin-reports-list" class="overflow-x-auto bg-white rounded-lg shadow">
+                   <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-reports-tbody" class="bg-white divide-y divide-gray-200">
+                            <!-- Admin reports will be inserted here -->
+                        </tbody>
+                   </table>
+                </div>
+            </div>
+            
+            <!-- =================================================================== -->
+            <!-- LEADERBOARD VIEW -->
+            <!-- =================================================================== -->
+            <div id="leaderboard-view" class="view">
+                 <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Community Leaderboard</h1>
+                 <p class="text-center text-gray-600 mb-6">Top 10 contributors will be felicitated monthly. Thank you for your service!</p>
+                 <div class="max-w-2xl mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-md border">
+                     <div id="leaderboard-list" class="space-y-3">
+                         <!-- Leaderboard entries will be inserted here -->
+                     </div>
+                 </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODALS -->
+    <!-- =================================================================== -->
+    
+    <!-- Report Issue Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-full overflow-y-auto p-6 relative">
+            <button id="close-report-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-4">Report a New Issue</h2>
+            <form id="report-form">
+                <div id="guest-fields" class="grid grid-cols-2 gap-4 mb-4 hidden">
+                    <div>
+                        <label for="guest-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" id="guest-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="guest-phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" id="guest-phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                </div>
+
+                <!-- Geo-Camera Feature -->
+                <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <p class="font-semibold mb-2">1. Capture Evidence</p>
+                    <div id="camera-container">
+                        <video id="video" autoplay playsinline></video>
+                        <canvas id="canvas"></canvas>
+                        <img id="captured-image" class="hidden rounded-lg w-full" alt="Captured issue">
+                        <button type="button" id="capture-btn" class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"><i data-lucide="camera"></i>Capture Photo</button>
+                        <button type="button" id="recapture-btn" class="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 hidden flex items-center justify-center gap-2"><i data-lucide="rotate-cw"></i>Recapture</button>
+                    </div>
+                </div>
+                 
+                <!-- Location -->
+                <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <p class="font-semibold mb-2">2. Provide Location</p>
+                    <p id="location-status" class="text-sm text-gray-500 mb-2">Fetching GPS coordinates...</p>
+                    <div id="manual-address-container">
+                         <label for="manual-address" class="block text-sm font-medium text-gray-700">Can't get GPS? Enter address manually:</label>
+                         <input type="text" id="manual-address" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <label for="description" class="block font-semibold mb-2">3. Describe the Issue</label>
+                    <textarea id="description" rows="4" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="e.g., 'Large pile of garbage near the main bus stop' or 'Streetlight not working for 3 days'" required></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Action Modal -->
+    <div id="admin-action-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
+            <button id="close-admin-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+            <h2 class="text-xl font-bold mb-4">Request Timeline Extension</h2>
+            <form id="extension-form">
+                <input type="hidden" id="extension-report-id">
+                 <div>
+                    <label for="extension-reason" class="block text-sm font-medium text-gray-700">Reason for Extension</label>
+                    <textarea id="extension-reason" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required placeholder="e.g., 'Special equipment required, arriving next week.'"></textarea>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                     <button type="button" id="cancel-extension" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancel</button>
+                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
+        <p id="toast-message"></p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

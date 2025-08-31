@@ -1,0 +1,30 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+.view {
+    display: none;
+}
+.view.active {
+    display: block;
+}
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+video {
+    width: 100%;
+    border-radius: 0.5rem;
+}
+canvas {
+    display: none;
+}
