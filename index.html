@@ -9,7 +9,38 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+        /* Custom scrollbar for better UX */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        video {
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
 
@@ -92,7 +123,7 @@
                    <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -133,40 +164,37 @@
             </button>
             <h2 class="text-2xl font-bold mb-4">Report a New Issue</h2>
             <form id="report-form">
-                <div id="guest-fields" class="grid grid-cols-2 gap-4 mb-4 hidden">
+                <div id="guest-fields" class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label for="guest-name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input type="text" id="guest-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <input type="text" id="guest-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                     <div>
                         <label for="guest-phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="tel" id="guest-phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                        <input type="tel" id="guest-phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                 </div>
 
-                <!-- Geo-Camera Feature -->
                 <div class="mb-4 p-4 border rounded-lg bg-gray-50">
                     <p class="font-semibold mb-2">1. Capture Evidence</p>
-                    <div id="camera-container">
-                        <video id="video" autoplay playsinline></video>
-                        <canvas id="canvas"></canvas>
-                        <img id="captured-image" class="hidden rounded-lg w-full" alt="Captured issue">
-                        <button type="button" id="capture-btn" class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"><i data-lucide="camera"></i>Capture Photo</button>
-                        <button type="button" id="recapture-btn" class="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 hidden flex items-center justify-center gap-2"><i data-lucide="rotate-cw"></i>Recapture</button>
+                    <div id="camera-container-report">
+                        <video id="video-report" autoplay playsinline></video>
+                        <canvas id="canvas-report"></canvas>
+                        <img id="captured-image-report" class="hidden rounded-lg w-full" alt="Captured issue">
+                        <button type="button" id="capture-btn-report" class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"><i data-lucide="camera"></i>Capture Photo</button>
+                        <button type="button" id="recapture-btn-report" class="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 hidden flex items-center justify-center gap-2"><i data-lucide="rotate-cw"></i>Recapture</button>
                     </div>
                 </div>
                  
-                <!-- Location -->
                 <div class="mb-4 p-4 border rounded-lg bg-gray-50">
                     <p class="font-semibold mb-2">2. Provide Location</p>
-                    <p id="location-status" class="text-sm text-gray-500 mb-2">Fetching GPS coordinates...</p>
+                    <p id="location-status-report" class="text-sm text-gray-500 mb-2">Fetching GPS coordinates...</p>
                     <div id="manual-address-container">
-                         <label for="manual-address" class="block text-sm font-medium text-gray-700">Can't get GPS? Enter address manually:</label>
-                         <input type="text" id="manual-address" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                         <label for="manual-address" class="block text-sm font-medium text-gray-700">Address (auto-filled from GPS)</label>
+                         <input type="text" id="manual-address" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Address will appear here...">
                     </div>
                 </div>
 
-                <!-- Description -->
                 <div class="mb-4 p-4 border rounded-lg bg-gray-50">
                     <label for="description" class="block font-semibold mb-2">3. Describe the Issue</label>
                     <textarea id="description" rows="4" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="e.g., 'Large pile of garbage near the main bus stop' or 'Streetlight not working for 3 days'" required></textarea>
@@ -177,33 +205,657 @@
         </div>
     </div>
 
-    <!-- Admin Action Modal -->
-    <div id="admin-action-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
-            <button id="close-admin-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+    <!-- Departmental Admin: Submit Proof Modal -->
+    <div id="proof-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-full overflow-y-auto p-6 relative">
+            <button id="close-proof-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
                 <i data-lucide="x" class="h-6 w-6"></i>
             </button>
-            <h2 class="text-xl font-bold mb-4">Request Timeline Extension</h2>
-            <form id="extension-form">
-                <input type="hidden" id="extension-report-id">
-                 <div>
-                    <label for="extension-reason" class="block text-sm font-medium text-gray-700">Reason for Extension</label>
-                    <textarea id="extension-reason" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required placeholder="e.g., 'Special equipment required, arriving next week.'"></textarea>
+            <h2 class="text-2xl font-bold mb-4">Submit Proof of Work</h2>
+            <form id="proof-form">
+                <input type="hidden" id="proof-report-id">
+                <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <p class="font-semibold mb-2">Capture Geo-tagged Photo of Completed Work</p>
+                    <div id="camera-container-proof">
+                        <video id="video-proof" autoplay playsinline></video>
+                        <canvas id="canvas-proof"></canvas>
+                        <img id="captured-image-proof" class="hidden rounded-lg w-full" alt="Captured proof of work">
+                        <button type="button" id="capture-btn-proof" class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"><i data-lucide="camera"></i>Capture Proof Photo</button>
+                        <button type="button" id="recapture-btn-proof" class="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 hidden flex items-center justify-center gap-2"><i data-lucide="rotate-cw"></i>Recapture</button>
+                    </div>
+                     <p id="location-status-proof" class="text-sm text-center mt-2 text-gray-500">Fetching current location...</p>
                 </div>
-                <div class="mt-4 flex justify-end gap-2">
-                     <button type="button" id="cancel-extension" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancel</button>
-                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Submit Request</button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Submit for Verification</button>
             </form>
         </div>
     </div>
+
+    <!-- Main Admin: Verification Modal -->
+    <div id="verification-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto p-6 relative">
+             <button id="close-verification-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i data-lucide="x" class="h-6 w-6"></i></button>
+             <h2 class="text-2xl font-bold mb-4 text-center">Verify Department Proof</h2>
+             <input type="hidden" id="verification-report-id">
+             <div id="verification-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Content will be injected by JS -->
+             </div>
+             <div class="mt-6 flex justify-center gap-4">
+                <button id="reject-proof-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-md hover:bg-red-700 transition">Reject Proof</button>
+                <button id="proceed-to-final-verification-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-md hover:bg-green-700 transition">Approve & Proceed to Final Verification</button>
+             </div>
+        </div>
+    </div>
     
+    <!-- Main Admin: Final Verification Photo Modal -->
+    <div id="final-verification-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-full overflow-y-auto p-6 relative">
+            <button id="close-final-verification-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-4">Final Resolution Verification</h2>
+            <form id="final-verification-form">
+                <input type="hidden" id="final-verification-report-id">
+                <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <p class="font-semibold mb-2">Capture Final On-Site Photo to Resolve Issue</p>
+                    <div id="camera-container-final">
+                        <video id="video-final" autoplay playsinline></video>
+                        <canvas id="canvas-final"></canvas>
+                        <img id="captured-image-final" class="hidden rounded-lg w-full" alt="Captured final verification photo">
+                        <button type="button" id="capture-btn-final" class="mt-2 w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex items-center justify-center gap-2"><i data-lucide="check-circle"></i>Capture Final Photo</button>
+                        <button type="button" id="recapture-btn-final" class="mt-2 w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 hidden flex items-center justify-center gap-2"><i data-lucide="rotate-cw"></i>Recapture</button>
+                    </div>
+                     <p id="location-status-final" class="text-sm text-center mt-2 text-gray-500">Fetching current location...</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Confirm and Resolve Issue</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50">
         <p id="toast-message"></p>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // App State
+        const state = {
+            currentUser: null, 
+            currentView: 'citizen-view',
+            reports: [],
+            users: [],
+            cameraStream: null,
+        };
+
+        // DOM Elements
+        const views = document.querySelectorAll('.view');
+        const userNav = document.getElementById('user-nav');
+        const homeLink = document.getElementById('home-link');
+        const reportModal = document.getElementById('report-modal');
+        const proofModal = document.getElementById('proof-modal');
+        const verificationModal = document.getElementById('verification-modal');
+        const finalVerificationModal = document.getElementById('final-verification-modal');
+
+        // Mock Database Initialization
+        function initializeDatabase() {
+            if (!localStorage.getItem('samadhan_users')) {
+                const defaultUsers = [
+                    { email: 'main-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'main', points: 0 },
+                    { email: 'water-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'water_supply', points: 0 },
+                    { email: 'sanitation-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'sanitation', points: 0 },
+                    { email: 'energy-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'energy', points: 0 },
+                    { email: 'transport-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'transport', points: 0 },
+                    { email: 'citizen1@example.com', password: 'password', role: 'citizen', points: 150 },
+                    { email: 'citizen2@example.com', password: 'password', role: 'citizen', points: 120 },
+                    { email: 'citizen3@example.com', password: 'password', role: 'citizen', points: 95 },
+                ];
+                localStorage.setItem('samadhan_users', JSON.stringify(defaultUsers));
+            }
+            if (!localStorage.getItem('samadhan_reports')) {
+                 const defaultReports = [
+                    { id: 1, userId: 'citizen1@example.com', description: 'Leaking water pipe on main road.', category: 'water_supply', status: 'In Progress', isFake: false, resolutionDate: new Date(Date.now() + 10*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Leaking+Pipe', location: { lat: 28.4595, lng: 77.0266, address: 'Near Huda City Centre, Gurgaon', timestamp: new Date(Date.now() - 5*24*60*60*1000).toISOString() }},
+                    { id: 2, userId: 'citizen2@example.com', description: 'Streetlight pole is damaged and sparking.', category: 'energy', status: 'Pending Approval', isFake: false, resolutionDate: new Date(Date.now() + 13*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/F59E0B/FFFFFF?text=Damaged+Pole', location: { lat: 28.4600, lng: 77.0270, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString() }, proof: { image: 'https://placehold.co/400x300/10B981/FFFFFF?text=Repaired+Pole', location: { lat: 28.4601, lng: 77.0271, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 1*60*60*1000).toISOString() }}},
+                    { id: 3, userId: 'guest', guestName: 'Ravi Kumar', guestPhone: '9876543210', description: 'asdfghjkl this is a test report.', category: 'general', status: 'New', isFake: true, resolutionDate: new Date(Date.now() + 15*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/CCCCCC/000000?text=Fake%3F', location: { lat: 28.4610, lng: 77.0280, address: 'Near Galleria Market, Gurgaon', timestamp: new Date().toISOString() }},
+                ];
+                localStorage.setItem('samadhan_reports', JSON.stringify(defaultReports));
+            }
+            state.users = JSON.parse(localStorage.getItem('samadhan_users'));
+            state.reports = JSON.parse(localStorage.getItem('samadhan_reports'));
+        }
+
+        // --- MOCKED AI ---
+        function aiCategorize(description) {
+            const desc = description.toLowerCase();
+            if (/\b(water|pipe|leak|sewage|drain)\b/.test(desc)) return 'water_supply';
+            if (/\b(garbage|waste|clean|dirty|trash|sanitation)\b/.test(desc)) return 'sanitation';
+            if (/\b(light|pole|electrical|wire|power|energy)\b/.test(desc)) return 'energy';
+            if (/\b(pothole|road|street|transport|bus|traffic)\b/.test(desc)) return 'transport';
+            return 'general';
+        }
+
+        function aiCheckFake(description) {
+            if (description.length < 15 || !/[aeiou]/.test(description.toLowerCase())) return true;
+            return false;
+        }
+
+        // --- UI & NAVIGATION ---
+        function navigate(viewId) {
+            views.forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            state.currentView = viewId;
+            updateUI();
+        }
+
+        function updateUI() {
+            userNav.innerHTML = '';
+            if (state.currentUser) {
+                userNav.innerHTML = `
+                    <span class="text-sm text-gray-600 hidden sm:block">${state.currentUser.email}</span>
+                    ${state.currentUser.role === 'citizen' ? '<button id="my-reports-btn" class="text-gray-600 hover:text-blue-600">My Reports</button>' : ''}
+                    <button id="logout-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 text-sm">Logout</button>
+                `;
+                document.getElementById('logout-btn').onclick = handleLogout;
+                if (state.currentUser.role === 'citizen') {
+                    document.getElementById('my-reports-btn').onclick = () => { 
+                        document.getElementById('my-reports-container').classList.toggle('hidden'); 
+                        renderMyReports(); 
+                    };
+                    document.getElementById('my-reports-container').classList.remove('hidden');
+                    renderMyReports();
+                } else {
+                    document.getElementById('my-reports-container').classList.add('hidden');
+                }
+            } else {
+                userNav.innerHTML = `<button id="login-btn" class="text-gray-600 hover:text-blue-600 font-semibold">Login / Register</button>`;
+                document.getElementById('login-btn').onclick = () => navigate('login-view');
+                document.getElementById('my-reports-container').classList.add('hidden');
+            }
+            if (state.currentView === 'admin-view') renderAdminDashboard();
+            if (state.currentView === 'leaderboard-view') renderLeaderboard();
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 z-50 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderAdminDashboard() {
+            const tbody = document.getElementById('admin-reports-tbody');
+            const admin = state.currentUser;
+            if (!admin) return;
+
+            const formatDept = (d) => d.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            document.getElementById('admin-department-text').textContent = admin.department === 'main' 
+                ? 'Viewing all reported civic issues.' 
+                : `Viewing issues for the ${formatDept(admin.department)} department.`;
+
+            const showFakeOnly = document.getElementById('filter-fake').checked;
+            
+            let reportsToDisplay = (admin.department === 'main') 
+                ? state.reports 
+                : state.reports.filter(r => r.category === admin.department);
+            
+            if (showFakeOnly) {
+                 reportsToDisplay = reportsToDisplay.filter(r => r.isFake);
+            }
+
+            tbody.innerHTML = reportsToDisplay.length === 0 ? `<tr><td colspan="4" class="text-center py-8 text-gray-500">No reports found.</td></tr>` : '';
+
+            reportsToDisplay.sort((a, b) => new Date(b.location.timestamp) - new Date(a.location.timestamp)).forEach(report => {
+                const tr = document.createElement('tr');
+                tr.className = report.isFake ? 'bg-yellow-50' : (report.status === 'Pending Approval' ? 'bg-purple-50' : '');
+                
+                const reporter = report.userId === 'guest' ? `${report.guestName} (Guest)` : report.userId;
+                const daysLeft = Math.round((new Date(report.resolutionDate) - new Date()) / (1000 * 60 * 60 * 24));
+                const timelineText = daysLeft >= 0 ? `${daysLeft} days left` : `${Math.abs(daysLeft)} days overdue`;
+                const timelineColor = daysLeft > 5 ? 'text-green-600' : (daysLeft > 0 ? 'text-yellow-600' : 'text-red-600');
+
+                let actionsHtml = '';
+                if(admin.department === 'main') {
+                    if(report.status === 'Pending Approval') {
+                        actionsHtml = `<button class="verify-btn bg-purple-600 text-white text-xs font-bold py-1 px-2 rounded hover:bg-purple-700" data-id="${report.id}">Verify</button>`;
+                    } else {
+                         actionsHtml = `<select class="status-change-select border-gray-300 rounded-md text-xs" data-id="${report.id}">
+                            <option value="New" ${report.status === 'New' ? 'selected' : ''}>New</option>
+                            <option value="In Progress" ${report.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                            <option value="Rejected" ${report.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>`;
+                    }
+                } else { // Departmental Admin
+                    if(report.status === 'In Progress') {
+                         actionsHtml = `<button class="submit-proof-btn bg-blue-600 text-white text-xs font-bold py-1 px-2 rounded hover:bg-blue-700" data-id="${report.id}">Submit Proof</button>`;
+                    } else if (report.status === 'New') {
+                        actionsHtml = `<button class="update-status-btn bg-yellow-500 text-white text-xs font-bold py-1 px-2 rounded hover:bg-yellow-600" data-id="${report.id}" data-status="In Progress">Start Work</button>`;
+                    }
+                }
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <img src="${report.image}" alt="Issue Image" class="h-16 w-16 object-cover rounded-md cursor-pointer" onclick="window.open('${report.image}', '_blank')">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">${report.description}</div>
+                        <div class="text-sm text-gray-500">By: ${reporter}</div>
+                         <div class="text-xs text-gray-500">${new Date(report.location.timestamp).toLocaleString()}</div>
+                         <a href="https://maps.google.com/?q=${report.location.lat},${report.location.lng}" target="_blank" class="text-sm text-blue-500 hover:underline">View on Map</a>
+                         ${report.isFake ? '<div class="text-xs font-bold text-yellow-600">FLAGGED: POTENTIALLY FAKE</div>' : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(report.status)}">${report.status}</span>
+                        <div class="text-sm text-gray-500 mt-1 font-semibold ${timelineColor}">${timelineText}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${actionsHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function renderMyReports() {
+             const list = document.getElementById('my-reports-list');
+            if(!state.currentUser || state.currentUser.role !== 'citizen') {
+                list.innerHTML = ''; return;
+            }
+            const myReports = state.reports.filter(r => r.userId === state.currentUser.email).sort((a,b) => new Date(b.location.timestamp) - new Date(a.location.timestamp));
+            list.innerHTML = myReports.length === 0 ? `<p class="text-center text-gray-500 p-4 bg-gray-50 rounded-lg">You haven't submitted any reports yet.</p>` : myReports.map(report => {
+                const daysLeft = Math.round((new Date(report.resolutionDate) - new Date()) / (1000 * 60 * 60 * 24));
+                const timelineText = daysLeft >= 0 ? `Est. Resolution: ${daysLeft} days` : `Overdue by ${Math.abs(daysLeft)} days`;
+                const timelineColor = daysLeft > 5 ? 'text-green-600' : (daysLeft > 0 ? 'text-yellow-600' : 'text-red-600');
+                return `<div class="bg-white p-4 rounded-lg shadow-sm border flex flex-col sm:flex-row gap-4">
+                    <img src="${report.image}" alt="Issue" class="w-full sm:w-32 h-32 object-cover rounded-md">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                             <p class="text-gray-800 font-medium">${report.description}</p>
+                             <span class="flex-shrink-0 ml-4 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(report.status)}">${report.status}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Reported on: ${new Date(report.location.timestamp).toLocaleDateString()}</p>
+                        <p class="text-sm font-semibold mt-1 ${timelineColor}">${timelineText}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderLeaderboard() {
+            // No changes here
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'New': return 'bg-blue-100 text-blue-800';
+                case 'In Progress': return 'bg-yellow-100 text-yellow-800';
+                case 'Pending Approval': return 'bg-purple-100 text-purple-800';
+                case 'Resolved': return 'bg-green-100 text-green-800';
+                case 'Rejected': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+        
+        // --- EVENT HANDLERS & LOGIC ---
+        function handleLogout() {
+            state.currentUser = null; navigate('citizen-view');
+        }
+        
+        document.getElementById('auth-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const isRegistering = document.getElementById('auth-submit-btn').textContent === 'Register';
+
+            if (isRegistering) {
+                const confirmPassword = document.getElementById('confirm-password').value;
+                if(password !== confirmPassword) {
+                    showToast("Passwords do not match.", false); return;
+                }
+                if(state.users.find(u => u.email === email)) {
+                    showToast("User with this email already exists.", false); return;
+                }
+                const newUser = { email, password, role: 'citizen', points: 0 };
+                state.users.push(newUser);
+                localStorage.setItem('samadhan_users', JSON.stringify(state.users));
+                state.currentUser = newUser;
+                showToast("Registration successful!");
+                navigate('citizen-view');
+            } else { // Logging in
+                const user = state.users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    state.currentUser = user;
+                    showToast("Login successful!");
+                    navigate(user.role === 'admin' ? 'admin-view' : 'citizen-view');
+                } else {
+                    showToast("Invalid email or password.", false);
+                }
+            }
+        });
+
+        document.getElementById('admin-reports-list').addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('submit-proof-btn')) {
+                const reportId = target.dataset.id;
+                document.getElementById('proof-report-id').value = reportId;
+                proofModal.classList.remove('hidden');
+                startCamera('proof');
+            }
+             if (target.classList.contains('verify-btn')) {
+                const reportId = parseInt(target.dataset.id);
+                const report = state.reports.find(r => r.id === reportId);
+                renderVerificationModal(report);
+                verificationModal.classList.remove('hidden');
+            }
+            if(target.classList.contains('update-status-btn')) {
+                 const reportId = parseInt(target.dataset.id);
+                 const newStatus = target.dataset.status;
+                 updateReportStatus(reportId, newStatus);
+            }
+        });
+
+         document.getElementById('admin-reports-list').addEventListener('change', function(e){
+            if(e.target.classList.contains('status-change-select')) {
+                const reportId = parseInt(e.target.dataset.id);
+                const newStatus = e.target.value;
+                updateReportStatus(reportId, newStatus);
+            }
+        });
+
+        function updateReportStatus(reportId, newStatus) {
+            const reportIndex = state.reports.findIndex(r => r.id === reportId);
+            if (reportIndex === -1) return;
+            
+            const oldStatus = state.reports[reportIndex].status;
+            state.reports[reportIndex].status = newStatus;
+            
+            if (newStatus === 'Resolved' && oldStatus !== 'Resolved') {
+                const userIndex = state.users.findIndex(u => u.email === state.reports[reportIndex].userId);
+                if (userIndex !== -1) state.users[userIndex].points += 10;
+            } else if (oldStatus === 'Resolved' && newStatus !== 'Resolved') {
+                const userIndex = state.users.findIndex(u => u.email === state.reports[reportIndex].userId);
+                if (userIndex !== -1) state.users[userIndex].points = Math.max(0, state.users[userIndex].points - 10);
+            }
+
+            localStorage.setItem('samadhan_reports', JSON.stringify(state.reports));
+            localStorage.setItem('samadhan_users', JSON.stringify(state.users));
+            showToast(`Report #${reportId} status updated to ${newStatus}.`);
+            renderAdminDashboard();
+        }
+
+        // --- CAMERA & LOCATION ---
+        let currentCapture = {};
+
+        async function startCamera(type) { // type = 'report', 'proof', 'final'
+            const elements = {
+                video: document.getElementById(`video-${type}`),
+                capturedImage: document.getElementById(`captured-image-${type}`),
+                captureBtn: document.getElementById(`capture-btn-${type}`),
+                recaptureBtn: document.getElementById(`recapture-btn-${type}`),
+            };
+
+            stopCamera(); // Stop any existing stream
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                state.cameraStream = stream;
+                elements.video.srcObject = stream;
+                elements.video.style.display = 'block';
+                elements.capturedImage.style.display = 'none';
+                elements.captureBtn.classList.remove('hidden');
+                elements.recaptureBtn.classList.add('hidden');
+                
+                getLocation(type);
+            } catch (err) {
+                console.error("Camera Error:", err);
+                alert("Could not access camera. Please grant permission.");
+            }
+        }
+
+        function stopCamera() {
+            if (state.cameraStream) {
+                state.cameraStream.getTracks().forEach(track => track.stop());
+                state.cameraStream = null;
+            }
+        }
+
+        async function getLocation(type) {
+            const elements = {
+                manualAddressInput: document.getElementById('manual-address'),
+                locationStatus: document.getElementById(`location-status-${type}`),
+            };
+
+            elements.locationStatus.textContent = "Fetching GPS coordinates...";
+            elements.locationStatus.className = 'text-sm text-gray-500 mb-2';
+
+            try {
+                const position = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 }));
+                const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                
+                elements.locationStatus.textContent = `GPS Acquired. Fetching address...`;
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.lat}&lon=${coords.lng}`);
+                const data = await response.json();
+                
+                currentCapture.location = {
+                    ...coords,
+                    address: data.display_name || 'Address not found',
+                    timestamp: new Date().toISOString()
+                };
+
+                if (type === 'report') elements.manualAddressInput.value = currentCapture.location.address;
+                elements.locationStatus.textContent = `Location captured: ${data.display_name.substring(0, 50)}...`;
+                elements.locationStatus.classList.add('text-green-600');
+            } catch (error) {
+                elements.locationStatus.textContent = "Could not get location. Check permissions.";
+                elements.locationStatus.classList.add('text-red-600');
+                currentCapture.location = null;
+            }
+        }
+        
+        document.getElementById('report-issue-btn').addEventListener('click', () => {
+             const guestNameInput = document.getElementById('guest-name');
+             const guestPhoneInput = document.getElementById('guest-phone');
+             const isLoggedIn = !!state.currentUser;
+
+             reportModal.classList.remove('hidden');
+             document.getElementById('guest-fields').classList.toggle('hidden', isLoggedIn);
+             
+             if (isLoggedIn) {
+                 guestNameInput.removeAttribute('required');
+                 guestPhoneInput.removeAttribute('required');
+             } else {
+                 guestNameInput.setAttribute('required', '');
+                 guestPhoneInput.setAttribute('required', '');
+             }
+             
+             startCamera('report');
+        });
+
+        document.getElementById('close-report-modal').addEventListener('click', () => {
+             reportModal.classList.add('hidden');
+             stopCamera();
+        });
+
+        function handleCapture(type) {
+             const elements = {
+                video: document.getElementById(`video-${type}`),
+                canvas: document.getElementById(`canvas-${type}`),
+                capturedImage: document.getElementById(`captured-image-${type}`),
+                captureBtn: document.getElementById(`capture-btn-${type}`),
+                recaptureBtn: document.getElementById(`recapture-btn-${type}`),
+            };
+            elements.canvas.width = elements.video.videoWidth;
+            elements.canvas.height = elements.video.videoHeight;
+            elements.canvas.getContext('2d').drawImage(elements.video, 0, 0, elements.canvas.width, elements.canvas.height);
+            currentCapture.image = elements.canvas.toDataURL('image/jpeg');
+            
+            elements.capturedImage.src = currentCapture.image;
+            elements.video.style.display = 'none';
+            elements.capturedImage.style.display = 'block';
+            elements.captureBtn.classList.add('hidden');
+            elements.recaptureBtn.classList.remove('hidden');
+            stopCamera();
+        }
+
+        document.getElementById('capture-btn-report').addEventListener('click', () => handleCapture('report'));
+        document.getElementById('recapture-btn-report').addEventListener('click', () => startCamera('report'));
+        document.getElementById('capture-btn-proof').addEventListener('click', () => handleCapture('proof'));
+        document.getElementById('recapture-btn-proof').addEventListener('click', () => startCamera('proof'));
+        document.getElementById('capture-btn-final').addEventListener('click', () => handleCapture('final'));
+        document.getElementById('recapture-btn-final').addEventListener('click', () => startCamera('final'));
+
+        document.getElementById('report-form').addEventListener('submit', function(e){
+            e.preventDefault();
+            if (!currentCapture.image || !currentCapture.location) {
+                showToast("Please capture a photo and allow location access.", false); return;
+            }
+            const newReport = {
+                id: Date.now(),
+                userId: state.currentUser ? state.currentUser.email : 'guest',
+                description: document.getElementById('description').value,
+                image: currentCapture.image,
+                location: currentCapture.location,
+                resolutionDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+                status: 'New',
+                category: aiCategorize(document.getElementById('description').value),
+                isFake: aiCheckFake(document.getElementById('description').value)
+            };
+            if(!state.currentUser) {
+                newReport.guestName = document.getElementById('guest-name').value;
+                newReport.guestPhone = document.getElementById('guest-phone').value;
+             }
+            state.reports.push(newReport);
+            localStorage.setItem('samadhan_reports', JSON.stringify(state.reports));
+            showToast("Report submitted successfully!");
+            reportModal.classList.add('hidden'); e.target.reset(); stopCamera();
+            if(state.currentUser) renderMyReports();
+        });
+
+        // --- NEW WORKFLOW MODALS ---
+        document.getElementById('close-proof-modal').addEventListener('click', () => {
+            proofModal.classList.add('hidden'); stopCamera();
+        });
+
+        document.getElementById('proof-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!currentCapture.image || !currentCapture.location) {
+                showToast("Please capture proof photo and allow location access.", false); return;
+            }
+            const reportId = parseInt(document.getElementById('proof-report-id').value);
+            const reportIndex = state.reports.findIndex(r => r.id === reportId);
+            if(reportIndex > -1) {
+                state.reports[reportIndex].status = 'Pending Approval';
+                state.reports[reportIndex].proof = currentCapture;
+                localStorage.setItem('samadhan_reports', JSON.stringify(state.reports));
+                showToast("Proof submitted for verification.");
+                proofModal.classList.add('hidden'); e.target.reset(); stopCamera();
+                renderAdminDashboard();
+            }
+        });
+
+        document.getElementById('close-verification-modal').addEventListener('click', () => verificationModal.classList.add('hidden'));
+
+        function renderVerificationModal(report) {
+            document.getElementById('verification-report-id').value = report.id;
+            const content = document.getElementById('verification-content');
+            const mapLink = (loc) => `https://maps.google.com/?q=${loc.lat},${loc.lng}`;
+
+            content.innerHTML = `
+                <div class="border p-4 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-center">Original Report</h3>
+                    <img src="${report.image}" class="w-full h-64 object-cover rounded-md mb-2">
+                    <p class="font-semibold">Timestamp:</p>
+                    <p class="text-sm text-gray-600">${new Date(report.location.timestamp).toLocaleString()}</p>
+                    <p class="font-semibold mt-2">Location:</p>
+                    <a href="${mapLink(report.location)}" target="_blank" class="text-sm text-blue-500 hover:underline">${report.location.address}</a>
+                </div>
+                <div class="border p-4 rounded-lg bg-green-50">
+                    <h3 class="font-bold text-lg mb-2 text-center">Proof of Work</h3>
+                    <img src="${report.proof.image}" class="w-full h-64 object-cover rounded-md mb-2">
+                     <p class="font-semibold">Timestamp:</p>
+                    <p class="text-sm text-gray-600">${new Date(report.proof.location.timestamp).toLocaleString()}</p>
+                    <p class="font-semibold mt-2">Location:</p>
+                    <a href="${mapLink(report.proof.location)}" target="_blank" class="text-sm text-blue-500 hover:underline">${report.proof.location.address}</a>
+                </div>
+            `;
+        }
+
+        document.getElementById('proceed-to-final-verification-btn').addEventListener('click', () => {
+            const reportId = document.getElementById('verification-report-id').value;
+            document.getElementById('final-verification-report-id').value = reportId;
+            verificationModal.classList.add('hidden');
+            finalVerificationModal.classList.remove('hidden');
+            startCamera('final');
+        });
+
+        document.getElementById('close-final-verification-modal').addEventListener('click', () => {
+            finalVerificationModal.classList.add('hidden'); stopCamera();
+        });
+
+        document.getElementById('final-verification-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!currentCapture.image || !currentCapture.location) {
+                showToast("Please capture the final verification photo.", false); return;
+            }
+            const reportId = parseInt(document.getElementById('final-verification-report-id').value);
+            const reportIndex = state.reports.findIndex(r => r.id === reportId);
+            if (reportIndex > -1) {
+                state.reports[reportIndex].finalVerification = currentCapture;
+                updateReportStatus(reportId, 'Resolved');
+                showToast("Issue successfully resolved with final verification.");
+                finalVerificationModal.classList.add('hidden'); e.target.reset(); stopCamera();
+            }
+        });
+        
+        document.getElementById('reject-proof-btn').addEventListener('click', () => {
+            const reportId = parseInt(document.getElementById('verification-report-id').value);
+            const reportIndex = state.reports.findIndex(r => r.id === reportId);
+            if(reportIndex > -1) {
+                state.reports[reportIndex].status = 'In Progress';
+                delete state.reports[reportIndex].proof;
+                localStorage.setItem('samadhan_reports', JSON.stringify(state.reports));
+                showToast("Proof has been rejected. Task returned to 'In Progress'.");
+                verificationModal.classList.add('hidden');
+                renderAdminDashboard();
+            }
+        });
+        
+        const authToggleText = document.getElementById('auth-toggle-text');
+        authToggleText.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.target.id;
+            const loginTitle = document.getElementById('login-title');
+            const confirmField = document.getElementById('register-confirm-password-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (targetId === 'show-register-link' || (targetId === 'show-login-link' && submitBtn.textContent === 'Login')) {
+                loginTitle.textContent = 'Citizen Registration';
+                confirmField.classList.remove('hidden');
+                submitBtn.textContent = 'Register';
+                authToggleText.innerHTML = `Already have an account? <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login here</a>.`;
+            } else if (targetId === 'show-admin-login-link') {
+                loginTitle.textContent = 'Admin Login';
+                confirmField.classList.add('hidden');
+                submitBtn.textContent = 'Login';
+                authToggleText.innerHTML = `Not an admin? <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Citizen</a>.`;
+            } else if (targetId === 'show-login-link') {
+                 loginTitle.textContent = 'Citizen Login';
+                confirmField.classList.add('hidden');
+                submitBtn.textContent = 'Login';
+                authToggleText.innerHTML = `Don't have an account? <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Register here</a>.<br>Are you an admin? <a href="#" id="show-admin-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Admin</a>.`;
+            }
+        });
+        
+        homeLink.addEventListener('click', (e) => { e.preventDefault(); navigate(state.currentUser?.role === 'admin' ? 'admin-view' : 'citizen-view'); });
+        document.getElementById('view-leaderboard-btn-citizen').addEventListener('click', () => navigate('leaderboard-view'));
+        
+        // --- App Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDatabase();
+            updateUI();
+            lucide.createIcons();
+        });
+    </script>
 </body>
 </html>
 
