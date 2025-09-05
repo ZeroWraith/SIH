@@ -46,16 +46,22 @@
             border-top: 4px solid #3498db;
             width: 20px;
             height: 20px;
-            -webkit-animation: spin 2s linear infinite; /* Safari */
             animation: spin 2s linear infinite;
         }
-
-        /* Safari */
-        @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
+        .mic-listening {
+            animation: pulse 1.5s infinite;
         }
-
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -215,7 +221,18 @@
                 </div>
 
                 <div class="mb-4 p-4 border rounded-lg bg-gray-50">
-                    <label for="description" class="block font-semibold mb-2">3. Describe the Issue</label>
+                    <div class="flex justify-between items-center mb-2">
+                         <label for="description" class="block font-semibold">3. Describe the Issue</label>
+                         <div id="speech-controls" class="flex items-center gap-2 hidden">
+                             <select id="speech-lang" class="border-gray-300 rounded-md text-sm py-1">
+                                 <option value="en-IN">English</option>
+                                 <option value="hi-IN">हिन्दी</option>
+                             </select>
+                            <button type="button" id="mic-btn" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+                                <i data-lucide="mic"></i>
+                            </button>
+                         </div>
+                    </div>
                     <textarea id="description" rows="4" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="e.g., 'Large pile of garbage near the main bus stop' or 'Streetlight not working for 3 days'" required></textarea>
                 </div>
 
@@ -307,6 +324,8 @@
             reports: [],
             users: [],
             cameraStream: null,
+            speechRecognition: null,
+            isListening: false,
         };
 
         // DOM Elements
@@ -955,6 +974,62 @@
                 updateAuthForm(targetState);
             }
         });
+
+        // --- SPEECH RECOGNITION ---
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                state.speechRecognition = new SpeechRecognition();
+                state.speechRecognition.continuous = false;
+                state.speechRecognition.interimResults = false;
+
+                const micBtn = document.getElementById('mic-btn');
+                const speechLangSelect = document.getElementById('speech-lang');
+                const descriptionTextarea = document.getElementById('description');
+
+                state.speechRecognition.onstart = () => {
+                    state.isListening = true;
+                    micBtn.classList.add('bg-red-500', 'mic-listening');
+                    micBtn.innerHTML = `<i data-lucide="square"></i>`;
+                    lucide.createIcons();
+                };
+
+                state.speechRecognition.onend = () => {
+                    state.isListening = false;
+                    micBtn.classList.remove('bg-red-500', 'mic-listening');
+                    micBtn.innerHTML = `<i data-lucide="mic"></i>`;
+                    lucide.createIcons();
+                };
+                
+                state.speechRecognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    descriptionTextarea.value += transcript + ' ';
+                };
+
+                state.speechRecognition.onerror = (event) => {
+                    console.error('Speech recognition error', event.error);
+                    showToast(`Speech recognition error: ${event.error}`, false);
+                    state.isListening = false;
+                    micBtn.classList.remove('bg-red-500', 'mic-listening');
+                    micBtn.innerHTML = `<i data-lucide="mic"></i>`;
+                    lucide.createIcons();
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (state.isListening) {
+                        state.speechRecognition.stop();
+                    } else {
+                        state.speechRecognition.lang = speechLangSelect.value;
+                        state.speechRecognition.start();
+                    }
+                });
+
+                document.getElementById('speech-controls').classList.remove('hidden');
+
+            } else {
+                console.warn("Speech Recognition not supported in this browser.");
+            }
+        }
         
         homeLink.addEventListener('click', (e) => { e.preventDefault(); navigate(state.currentUser?.role === 'admin' ? 'admin-view' : 'citizen-view'); });
         document.getElementById('view-leaderboard-btn-citizen').addEventListener('click', () => navigate('leaderboard-view'));
@@ -965,6 +1040,7 @@
             initializeDatabase();
             updateUI();
             updateAuthForm('citizen-login');
+            setupSpeechRecognition();
             lucide.createIcons();
         });
     </script>
