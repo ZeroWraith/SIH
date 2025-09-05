@@ -341,21 +341,32 @@
         function initializeDatabase() {
             if (!localStorage.getItem('samadhan_users')) {
                 const defaultUsers = [
+                    // Admins
                     { email: 'main-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'main', points: 0 },
                     { email: 'water-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'water_supply', points: 0 },
                     { email: 'sanitation-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'sanitation', points: 0 },
                     { email: 'energy-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'energy', points: 0 },
                     { email: 'transport-admin@samadhan.gov.in', password: 'password', role: 'admin', department: 'transport', points: 0 },
-                    { email: 'citizen1@example.com', password: 'password', role: 'citizen', points: 150 },
-                    { email: 'citizen2@example.com', password: 'password', role: 'citizen', points: 120 },
-                    { email: 'citizen3@example.com', password: 'password', role: 'citizen', points: 95 },
+                    // Citizens for Leaderboard
+                    { email: 'priya.s@example.com', password: 'password', role: 'citizen', points: 210 },
+                    { email: 'arjun.k@example.com', password: 'password', role: 'citizen', points: 195 },
+                    { email: 'isha.m@example.com', password: 'password', role: 'citizen', points: 182 },
+                    { email: 'rohit.v@example.com', password: 'password', role: 'citizen', points: 150 },
+                    { email: 'anika.p@example.com', password: 'password', role: 'citizen', points: 120 },
+                    { email: 'vikram.r@example.com', password: 'password', role: 'citizen', points: 115 },
+                    { email: 'sunita.g@example.com', password: 'password', role: 'citizen', points: 95 },
+                    { email: 'deepak.c@example.com', password: 'password', role: 'citizen', points: 84 },
+                    { email: 'neha.j@example.com', password: 'password', role: 'citizen', points: 72 },
+                    { email: 'karan.b@example.com', password: 'password', role: 'citizen', points: 65 },
+                    { email: 'meera.s@example.com', password: 'password', role: 'citizen', points: 50 },
+                    { email: 'aditya.n@example.com', password: 'password', role: 'citizen', points: 45 },
                 ];
                 localStorage.setItem('samadhan_users', JSON.stringify(defaultUsers));
             }
             if (!localStorage.getItem('samadhan_reports')) {
                  const defaultReports = [
-                    { id: 1, userId: 'citizen1@example.com', description: 'Leaking water pipe on main road.', category: 'water_supply', status: 'In Progress', isFake: false, resolutionDate: new Date(Date.now() + 10*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Leaking+Pipe', location: { lat: 28.4595, lng: 77.0266, address: 'Near Huda City Centre, Gurgaon', timestamp: new Date(Date.now() - 5*24*60*60*1000).toISOString() }},
-                    { id: 2, userId: 'citizen2@example.com', description: 'Streetlight pole is damaged and sparking.', category: 'energy', status: 'Pending Approval', isFake: false, resolutionDate: new Date(Date.now() + 13*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/F59E0B/FFFFFF?text=Damaged+Pole', location: { lat: 28.4600, lng: 77.0270, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString() }, proof: { image: 'https://placehold.co/400x300/10B981/FFFFFF?text=Repaired+Pole', location: { lat: 28.4601, lng: 77.0271, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 1*60*60*1000).toISOString() }}},
+                    { id: 1, userId: 'priya.s@example.com', description: 'Leaking water pipe on main road.', category: 'water_supply', status: 'In Progress', isFake: false, resolutionDate: new Date(Date.now() + 10*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Leaking+Pipe', location: { lat: 28.4595, lng: 77.0266, address: 'Near Huda City Centre, Gurgaon', timestamp: new Date(Date.now() - 5*24*60*60*1000).toISOString() }},
+                    { id: 2, userId: 'arjun.k@example.com', description: 'Streetlight pole is damaged and sparking.', category: 'energy', status: 'Pending Approval', isFake: false, resolutionDate: new Date(Date.now() + 13*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/F59E0B/FFFFFF?text=Damaged+Pole', location: { lat: 28.4600, lng: 77.0270, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString() }, proof: { image: 'https://placehold.co/400x300/10B981/FFFFFF?text=Repaired+Pole', location: { lat: 28.4601, lng: 77.0271, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 1*60*60*1000).toISOString() }}},
                     { id: 3, userId: 'guest', guestName: 'Ravi Kumar', guestPhone: '9876543210', description: 'This is a lovely park, not a pothole.', category: 'transport', status: 'New', isFake: true, resolutionDate: new Date(Date.now() + 15*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/22C55E/FFFFFF?text=A+Lovely+Park', location: { lat: 28.4610, lng: 77.0280, address: 'Near Galleria Market, Gurgaon', timestamp: new Date().toISOString() }},
                 ];
                 localStorage.setItem('samadhan_reports', JSON.stringify(defaultReports));
@@ -584,7 +595,32 @@
         }
 
         function renderLeaderboard() {
-            // No changes here
+            const list = document.getElementById('leaderboard-list');
+            const sortedUsers = [...state.users]
+                .filter(u => u.role === 'citizen')
+                .sort((a, b) => b.points - a.points)
+                .slice(0, 10);
+            
+            list.innerHTML = '';
+
+            sortedUsers.forEach((user, index) => {
+                const entry = document.createElement('div');
+                const rank = index + 1;
+                let bgColor = 'bg-white';
+                if(rank === 1) bgColor = 'bg-yellow-100 border-yellow-300';
+                if(rank === 2) bgColor = 'bg-gray-200 border-gray-300';
+                if(rank === 3) bgColor = 'bg-orange-100 border-orange-300';
+                
+                entry.className = `p-3 rounded-lg flex items-center justify-between border ${bgColor}`;
+                entry.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="font-bold text-lg text-gray-700 w-8 text-center">${rank}</span>
+                        <span class="font-medium text-gray-800">${user.email}</span>
+                    </div>
+                    <div class="font-bold text-blue-600">${user.points} pts</div>
+                `;
+                list.appendChild(entry);
+            });
         }
         
         function getStatusClass(status) {
@@ -607,7 +643,6 @@
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            // BUG FIX: More robust check for registration mode
             const isRegistering = document.getElementById('auth-submit-btn').textContent === 'Register';
 
             if (isRegistering) {
