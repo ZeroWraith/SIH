@@ -121,8 +121,7 @@
                         <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition">Login</button>
                     </form>
                     <p id="auth-toggle-text" class="text-center text-sm text-gray-600 mt-4">
-                        Don't have an account? <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Register here</a>.
-                        <br>Are you an admin? <a href="#" id="show-admin-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Admin</a>.
+                        <!-- This content is now managed by the updateAuthForm function -->
                     </p>
                  </div>
             </div>
@@ -448,7 +447,10 @@
                 }
             } else {
                 userNav.innerHTML = `<button id="login-btn" class="text-gray-600 hover:text-blue-600 font-semibold">Login / Register</button>`;
-                document.getElementById('login-btn').onclick = () => navigate('login-view');
+                document.getElementById('login-btn').onclick = () => {
+                    navigate('login-view');
+                    updateAuthForm('citizen-login');
+                };
                 document.getElementById('my-reports-container').classList.add('hidden');
             }
             if (state.currentView === 'admin-view') renderAdminDashboard();
@@ -584,8 +586,9 @@
         
         document.getElementById('auth-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            // BUG FIX: More robust check for registration mode
             const isRegistering = document.getElementById('auth-submit-btn').textContent === 'Register';
 
             if (isRegistering) {
@@ -919,29 +922,37 @@
             }
         });
         
-        const authToggleText = document.getElementById('auth-toggle-text');
-        authToggleText.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = e.target.id;
+        // --- LOGIN FORM REFACTOR ---
+        function updateAuthForm(formState) { // Can be 'citizen-login', 'admin-login', or 'register'
             const loginTitle = document.getElementById('login-title');
             const confirmField = document.getElementById('register-confirm-password-field');
             const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleText = document.getElementById('auth-toggle-text');
 
-            if (targetId === 'show-register-link') {
+            confirmField.classList.add('hidden'); // Hide by default
+            document.getElementById('auth-form').reset();
+
+            if (formState === 'register') {
                 loginTitle.textContent = 'Citizen Registration';
                 confirmField.classList.remove('hidden');
                 submitBtn.textContent = 'Register';
-                authToggleText.innerHTML = `Already have an account? <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login here</a>.`;
-            } else if (targetId === 'show-admin-login-link') {
+                toggleText.innerHTML = `Already have an account? <a href="#" class="auth-toggle font-medium text-blue-600 hover:text-blue-500" data-target="citizen-login">Login here</a>.`;
+            } else if (formState === 'admin-login') {
                 loginTitle.textContent = 'Admin Login';
-                confirmField.classList.add('hidden');
                 submitBtn.textContent = 'Login';
-                authToggleText.innerHTML = `Not an admin? <a href="#" id="show-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Citizen</a>.`;
-            } else if (targetId === 'show-login-link') {
-                 loginTitle.textContent = 'Citizen Login';
-                confirmField.classList.add('hidden');
+                toggleText.innerHTML = `Not an admin? <a href="#" class="auth-toggle font-medium text-blue-600 hover:text-blue-500" data-target="citizen-login">Login as Citizen</a>.`;
+            } else { // 'citizen-login'
+                loginTitle.textContent = 'Citizen Login';
                 submitBtn.textContent = 'Login';
-                authToggleText.innerHTML = `Don't have an account? <a href="#" id="show-register-link" class="font-medium text-blue-600 hover:text-blue-500">Register here</a>.<br>Are you an admin? <a href="#" id="show-admin-login-link" class="font-medium text-blue-600 hover:text-blue-500">Login as Admin</a>.`;
+                toggleText.innerHTML = `Don't have an account? <a href="#" class="auth-toggle font-medium text-blue-600 hover:text-blue-500" data-target="register">Register here</a>.<br>Are you an admin? <a href="#" class="auth-toggle font-medium text-blue-600 hover:text-blue-500" data-target="admin-login">Login as Admin</a>.`;
+            }
+        }
+        
+        document.getElementById('auth-toggle-text').addEventListener('click', (e) => {
+            if (e.target.classList.contains('auth-toggle')) {
+                e.preventDefault();
+                const targetState = e.target.dataset.target;
+                updateAuthForm(targetState);
             }
         });
         
@@ -953,6 +964,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeDatabase();
             updateUI();
+            updateAuthForm('citizen-login');
             lucide.createIcons();
         });
     </script>
