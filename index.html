@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samadhan - Civic Issue Resolution Platform</title>
+    <title>Samadhan - AI-Powered Civic Issue Resolution</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,6 +40,26 @@
         canvas {
             display: none;
         }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 2s linear infinite; /* Safari */
+            animation: spin 2s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -65,7 +85,7 @@
             <div id="citizen-view" class="view active">
                 <div class="text-center bg-blue-50 p-8 rounded-xl border border-blue-100">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Welcome to Samadhan</h1>
-                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">Your direct link to municipal authorities. Report civic issues, track their resolution, and help build a better community.</p>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">Your direct link to municipal authorities. Report civic issues with AI-powered classification, track their resolution, and help build a better community.</p>
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                         <button id="report-issue-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow hover:bg-blue-700 transition w-full sm:w-auto flex items-center justify-center gap-2"><i data-lucide="megaphone"></i>Report an Issue</button>
                         <button id="view-leaderboard-btn-citizen" class="bg-white text-blue-600 border border-blue-600 font-semibold py-3 px-6 rounded-lg hover:bg-blue-50 transition w-full sm:w-auto flex items-center justify-center gap-2"><i data-lucide="trophy"></i>Community Leaderboard</button>
@@ -116,7 +136,7 @@
                 <div class="mb-4 flex gap-4">
                     <label class="flex items-center">
                         <input type="checkbox" id="filter-fake" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <span class="ml-2 text-gray-700">Show only "Potentially Fake"</span>
+                        <span class="ml-2 text-gray-700">Show only AI-Flagged Reports</span>
                     </label>
                 </div>
                 <div id="admin-reports-list" class="overflow-x-auto bg-white rounded-lg shadow">
@@ -200,7 +220,9 @@
                     <textarea id="description" rows="4" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="e.g., 'Large pile of garbage near the main bus stop' or 'Streetlight not working for 3 days'" required></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition">Submit Report</button>
+                <button type="submit" id="submit-report-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                    Submit Report
+                </button>
             </form>
         </div>
     </div>
@@ -316,7 +338,7 @@
                  const defaultReports = [
                     { id: 1, userId: 'citizen1@example.com', description: 'Leaking water pipe on main road.', category: 'water_supply', status: 'In Progress', isFake: false, resolutionDate: new Date(Date.now() + 10*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/3B82F6/FFFFFF?text=Leaking+Pipe', location: { lat: 28.4595, lng: 77.0266, address: 'Near Huda City Centre, Gurgaon', timestamp: new Date(Date.now() - 5*24*60*60*1000).toISOString() }},
                     { id: 2, userId: 'citizen2@example.com', description: 'Streetlight pole is damaged and sparking.', category: 'energy', status: 'Pending Approval', isFake: false, resolutionDate: new Date(Date.now() + 13*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/F59E0B/FFFFFF?text=Damaged+Pole', location: { lat: 28.4600, lng: 77.0270, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString() }, proof: { image: 'https://placehold.co/400x300/10B981/FFFFFF?text=Repaired+Pole', location: { lat: 28.4601, lng: 77.0271, address: 'Sector 44, Gurgaon', timestamp: new Date(Date.now() - 1*60*60*1000).toISOString() }}},
-                    { id: 3, userId: 'guest', guestName: 'Ravi Kumar', guestPhone: '9876543210', description: 'asdfghjkl this is a test report.', category: 'general', status: 'New', isFake: true, resolutionDate: new Date(Date.now() + 15*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/CCCCCC/000000?text=Fake%3F', location: { lat: 28.4610, lng: 77.0280, address: 'Near Galleria Market, Gurgaon', timestamp: new Date().toISOString() }},
+                    { id: 3, userId: 'guest', guestName: 'Ravi Kumar', guestPhone: '9876543210', description: 'This is a lovely park, not a pothole.', category: 'transport', status: 'New', isFake: true, resolutionDate: new Date(Date.now() + 15*24*60*60*1000).toISOString(), image: 'https://placehold.co/400x300/22C55E/FFFFFF?text=A+Lovely+Park', location: { lat: 28.4610, lng: 77.0280, address: 'Near Galleria Market, Gurgaon', timestamp: new Date().toISOString() }},
                 ];
                 localStorage.setItem('samadhan_reports', JSON.stringify(defaultReports));
             }
@@ -324,19 +346,77 @@
             state.reports = JSON.parse(localStorage.getItem('samadhan_reports'));
         }
 
-        // --- MOCKED AI ---
-        function aiCategorize(description) {
-            const desc = description.toLowerCase();
-            if (/\b(water|pipe|leak|sewage|drain)\b/.test(desc)) return 'water_supply';
-            if (/\b(garbage|waste|clean|dirty|trash|sanitation)\b/.test(desc)) return 'sanitation';
-            if (/\b(light|pole|electrical|wire|power|energy)\b/.test(desc)) return 'energy';
-            if (/\b(pothole|road|street|transport|bus|traffic)\b/.test(desc)) return 'transport';
-            return 'general';
-        }
+        // --- GEMINI API INTEGRATION ---
+        async function getAiAnalysis(base64ImageData, description) {
+            const apiKey = ""; // Leave empty, will be handled by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            const prompt = `
+                You are an AI expert for a civic issues reporting platform in India. Your task is to analyze an image and a user's description to perform two tasks:
+                1.  **Classify the issue**: Categorize the problem into ONE of the following departments: 'water_supply', 'sanitation', 'energy', 'transport'.
+                2.  **Verify the report**: Determine if the image and description are consistent. If they clearly mismatch (e.g., description says "pothole" but image shows a cat), the report is fake.
 
-        function aiCheckFake(description) {
-            if (description.length < 15 || !/[aeiou]/.test(description.toLowerCase())) return true;
-            return false;
+                User Description: "${description}"
+
+                Respond with a JSON object in the following format, and nothing else:
+                {
+                  "category": "department_name",
+                  "isFake": boolean
+                }
+
+                Example 1: Description="Overflowing garbage bin", Image=picture of trash -> {"category": "sanitation", "isFake": false}
+                Example 2: Description="Broken streetlight", Image=picture of a damaged pole -> {"category": "energy", "isFake": false}
+                Example 3: Description="There is a huge pothole here", Image=picture of a dog -> {"category": "transport", "isFake": true}
+                
+                If the issue is unclear or doesn't fit, classify it as "general". If the description is nonsensical, mark "isFake" as true.
+            `;
+
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: "image/jpeg",
+                                data: base64ImageData
+                            }
+                        }
+                    ]
+                }],
+                 generationConfig: {
+                    responseMimeType: "application/json",
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    console.error("Gemini API response not ok:", await response.text());
+                    return { category: "general", isFake: false }; // Fallback
+                }
+
+                const result = await response.json();
+                const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsedJson = JSON.parse(responseText);
+                
+                const validDepartments = ["water_supply", "sanitation", "energy", "transport", "general"];
+                const category = parsedJson.category?.trim().toLowerCase();
+                
+                return {
+                    category: validDepartments.includes(category) ? category : "general",
+                    isFake: typeof parsedJson.isFake === 'boolean' ? parsedJson.isFake : false
+                };
+
+            } catch (error) {
+                console.error('Error calling or parsing Gemini API:', error);
+                showToast("AI analysis failed. Categorizing manually.", false);
+                return { category: "general", isFake: false }; // Fallback on error
+            }
         }
 
         // --- UI & NAVIGATION ---
@@ -442,10 +522,11 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">${report.description}</div>
+                        <div class="text-sm text-gray-500">Dept: <strong>${formatDept(report.category)}</strong></div>
                         <div class="text-sm text-gray-500">By: ${reporter}</div>
                          <div class="text-xs text-gray-500">${new Date(report.location.timestamp).toLocaleString()}</div>
                          <a href="https://maps.google.com/?q=${report.location.lat},${report.location.lng}" target="_blank" class="text-sm text-blue-500 hover:underline">View on Map</a>
-                         ${report.isFake ? '<div class="text-xs font-bold text-yellow-600">FLAGGED: POTENTIALLY FAKE</div>' : ''}
+                         ${report.isFake ? '<div class="text-xs font-bold text-yellow-600">AI-FLAGGED: Inconsistent Report</div>' : ''}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(report.status)}">${report.status}</span>
@@ -704,21 +785,32 @@
         document.getElementById('capture-btn-final').addEventListener('click', () => handleCapture('final'));
         document.getElementById('recapture-btn-final').addEventListener('click', () => startCamera('final'));
 
-        document.getElementById('report-form').addEventListener('submit', function(e){
+        document.getElementById('report-form').addEventListener('submit', async function(e){
             e.preventDefault();
+            const submitBtn = document.getElementById('submit-report-btn');
+
             if (!currentCapture.image || !currentCapture.location) {
                 showToast("Please capture a photo and allow location access.", false); return;
             }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<div class="loader"></div> <span class="ml-2">Submitting & Analyzing with AI...</span>`;
+
+            const description = document.getElementById('description').value;
+            const base64Image = currentCapture.image.split(',')[1];
+            
+            const aiResult = await getAiAnalysis(base64Image, description);
+
             const newReport = {
                 id: Date.now(),
                 userId: state.currentUser ? state.currentUser.email : 'guest',
-                description: document.getElementById('description').value,
+                description: description,
                 image: currentCapture.image,
                 location: currentCapture.location,
                 resolutionDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
                 status: 'New',
-                category: aiCategorize(document.getElementById('description').value),
-                isFake: aiCheckFake(document.getElementById('description').value)
+                category: aiResult.category,
+                isFake: aiResult.isFake
             };
             if(!state.currentUser) {
                 newReport.guestName = document.getElementById('guest-name').value;
@@ -726,7 +818,14 @@
              }
             state.reports.push(newReport);
             localStorage.setItem('samadhan_reports', JSON.stringify(state.reports));
-            showToast("Report submitted successfully!");
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Report';
+
+            showToast(`Report submitted! AI classified it as: ${aiResult.category.replace('_', ' ')}.`);
+            if (aiResult.isFake) {
+                showToast("AI flagged this report as potentially inconsistent.", false);
+            }
             reportModal.classList.add('hidden'); e.target.reset(); stopCamera();
             if(state.currentUser) renderMyReports();
         });
@@ -828,7 +927,7 @@
             const confirmField = document.getElementById('register-confirm-password-field');
             const submitBtn = document.getElementById('auth-submit-btn');
 
-            if (targetId === 'show-register-link' || (targetId === 'show-login-link' && submitBtn.textContent === 'Login')) {
+            if (targetId === 'show-register-link') {
                 loginTitle.textContent = 'Citizen Registration';
                 confirmField.classList.remove('hidden');
                 submitBtn.textContent = 'Register';
@@ -848,6 +947,7 @@
         
         homeLink.addEventListener('click', (e) => { e.preventDefault(); navigate(state.currentUser?.role === 'admin' ? 'admin-view' : 'citizen-view'); });
         document.getElementById('view-leaderboard-btn-citizen').addEventListener('click', () => navigate('leaderboard-view'));
+        document.getElementById('filter-fake').addEventListener('change', renderAdminDashboard);
         
         // --- App Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
